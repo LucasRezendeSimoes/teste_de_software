@@ -1,0 +1,166 @@
+Teste retornou 1 erro e 11 sucessos
+O erro se deve ao programa não encontrar o Chrome nem o Chromium instalado na máquina
+
+
+================================================================================================================================= test session starts ==================================================================================================================================
+platform win32 -- Python 3.10.11, pytest-7.4.3, pluggy-1.6.0 -- C:\Users\daiki\OneDrive\Documents\GitHub\teste_de_software\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.10.11', 'Platform': 'Windows-10-10.0.19045-SP0', 'Packages': {'pytest': '7.4.3', 'pluggy': '1.6.0'}, 'Plugins': {'cov': '4.1.0', 'html': '4.1.1', 'metadata': '3.1.1'}}
+rootdir: C:\Users\daiki\OneDrive\Documents\GitHub\teste_de_software\aula10-testes-web-rest\exercicios\tests
+plugins: cov-4.1.0, html-4.1.1, metadata-3.1.1
+collected 12 items
+
+test_login.py::test_login FAILED                                                                                                                                                                                                                                                  [  8%]
+test_products_api.py::test_listar_produtos PASSED                                                                                                                                                                                                                                 [ 16%]
+test_products_api.py::test_buscar_produto_por_id PASSED                                                                                                                                                                                                                           [ 25%]
+test_products_api.py::test_filtrar_produtos_por_categoria PASSED                                                                                                                                                                                                                  [ 33%]
+test_products_api.py::test_validar_schema_resposta PASSED                                                                                                                                                                                                                         [ 41%]
+test_products_api.py::test_limite_de_produtos_retornados PASSED                                                                                                                                                                                                                   [ 50%]
+test_todos_crud.py::test_create_todo PASSED                                                                                                                                                                                                                                       [ 58%]
+test_todos_crud.py::test_read_todo PASSED                                                                                                                                                                                                                                         [ 66%]
+test_todos_crud.py::test_update_todo PASSED                                                                                                                                                                                                                                       [ 75%]
+test_todos_crud.py::test_delete_todo PASSED                                                                                                                                                                                                                                       [ 83%]
+test_todos_crud.py::test_verify_deleted_todo PASSED                                                                                                                                                                                                                               [ 91%]
+test_todos_crud.py::test_create_todo_sem_titulo PASSED                                                                                                                                                                                                                            [100%]
+
+======================================================================================================================================= FAILURES ======================================================================================================================================= 
+______________________________________________________________________________________________________________________________________ test_login ______________________________________________________________________________________________________________________________________ 
+
+    def test_login():
+>       driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+
+test_login.py:8:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  
+..\..\..\.venv\lib\site-packages\selenium\webdriver\chrome\webdriver.py:45: in __init__
+    super().__init__(
+..\..\..\.venv\lib\site-packages\selenium\webdriver\chromium\webdriver.py:56: in __init__
+    super().__init__(
+..\..\..\.venv\lib\site-packages\selenium\webdriver\remote\webdriver.py:208: in __init__
+    self.start_session(capabilities)
+..\..\..\.venv\lib\site-packages\selenium\webdriver\remote\webdriver.py:292: in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+..\..\..\.venv\lib\site-packages\selenium\webdriver\remote\webdriver.py:347: in execute
+    self.error_handler.check_response(response)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  
+
+self = <selenium.webdriver.remote.errorhandler.ErrorHandler object at 0x000001B4343827A0>
+response = {'status': 500, 'value': '{"value":{"error":"unknown error","message":"unknown error: cannot find Chrome binary","stac...\n\\tRtlGetAppContainerNamedObjectPath [0x77AE82AE+286]\\n\\tRtlGetAppContainerNamedObjectPath [0x77AE827E+238]\\n"}}'}
+
+    def check_response(self, response: Dict[str, Any]) -> None:
+        """Checks that a JSON response from the WebDriver does not have an
+        error.
+
+        :Args:
+         - response - The JSON response from the WebDriver server as a dictionary
+           object.
+
+        :Raises: If the response contains an error message.
+        """
+        status = response.get("status", None)
+        if not status or status == ErrorCode.SUCCESS:
+            return
+        value = None
+        message = response.get("message", "")
+        screen: str = response.get("screen", "")
+        stacktrace = None
+        if isinstance(status, int):
+            value_json = response.get("value", None)
+            if value_json and isinstance(value_json, str):
+                import json
+
+                try:
+                    value = json.loads(value_json)
+                    if len(value) == 1:
+                        value = value["value"]
+                    status = value.get("error", None)
+                    if not status:
+                        status = value.get("status", ErrorCode.UNKNOWN_ERROR)
+                        message = value.get("value") or value.get("message")
+                        if not isinstance(message, str):
+                            value = message
+                            message = message.get("message")
+                    else:
+                        message = value.get("message", None)
+                except ValueError:
+                    pass
+
+        exception_class: Type[WebDriverException]
+        e = ErrorCode()
+        error_codes = [item for item in dir(e) if not item.startswith("__")]
+        for error_code in error_codes:
+            error_info = getattr(ErrorCode, error_code)
+            if isinstance(error_info, list) and status in error_info:
+                exception_class = getattr(ExceptionMapping, error_code, WebDriverException)
+                break
+        else:
+            exception_class = WebDriverException
+
+        if not value:
+            value = response["value"]
+        if isinstance(value, str):
+            raise exception_class(value)
+        if message == "" and "message" in value:
+            message = value["message"]
+
+        screen = None  # type: ignore[assignment]
+        if "screen" in value:
+            screen = value["screen"]
+
+        stacktrace = None
+        st_value = value.get("stackTrace") or value.get("stacktrace")
+        if st_value:
+            if isinstance(st_value, str):
+                stacktrace = st_value.split("\n")
+            else:
+                stacktrace = []
+                try:
+                    for frame in st_value:
+                        line = frame.get("lineNumber", "")
+                        file = frame.get("fileName", "<anonymous>")
+                        if line:
+                            file = f"{file}:{line}"
+                        meth = frame.get("methodName", "<anonymous>")
+                        if "className" in frame:
+                            meth = f"{frame['className']}.{meth}"
+                        msg = "    at %s (%s)"
+                        msg = msg % (meth, file)
+                        stacktrace.append(msg)
+                except TypeError:
+                    pass
+        if exception_class == UnexpectedAlertPresentException:
+            alert_text = None
+            if "data" in value:
+                alert_text = value["data"].get("text")
+            elif "alert" in value:
+                alert_text = value["alert"].get("text")
+            raise exception_class(message, screen, stacktrace, alert_text)  # type: ignore[call-arg]  # mypy is not smart enough here
+>       raise exception_class(message, screen, stacktrace)
+E       selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary
+E       Stacktrace:
+E       Backtrace:
+E               GetHandleVerifier [0x00A3A813+48355]
+E               (No symbol) [0x009CC4B1]
+E               (No symbol) [0x008D5358]
+E               (No symbol) [0x008F1A9E]
+E               (No symbol) [0x008F0579]
+E               (No symbol) [0x00920C55]
+E               (No symbol) [0x0092093C]
+E               (No symbol) [0x0091A536]
+E               (No symbol) [0x008F82DC]
+E               (No symbol) [0x008F93DD]
+E               GetHandleVerifier [0x00C9AABD+2539405]
+E               GetHandleVerifier [0x00CDA78F+2800735]
+E               GetHandleVerifier [0x00CD456C+2775612]
+E               GetHandleVerifier [0x00AC51E0+616112]
+E               (No symbol) [0x009D5F8C]
+E               (No symbol) [0x009D2328]
+E               (No symbol) [0x009D240B]
+E               (No symbol) [0x009C4FF7]
+E               BaseThreadInitThunk [0x769AFCC9+25]
+E               RtlGetAppContainerNamedObjectPath [0x77AE82AE+286]
+E               RtlGetAppContainerNamedObjectPath [0x77AE827E+238]
+
+..\..\..\.venv\lib\site-packages\selenium\webdriver\remote\errorhandler.py:229: WebDriverException
+=============================================================================================================================== short test summary info ================================================================================================================================ 
+FAILED test_login.py::test_login - selenium.common.exceptions.WebDriverException: Message: unknown error: cannot find Chrome binary
+============================================================================================================================= 1 failed, 11 passed in 7.84s ============================================================================================================================= 
